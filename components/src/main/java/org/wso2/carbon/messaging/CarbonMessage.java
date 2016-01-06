@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -19,6 +20,9 @@ public abstract class CarbonMessage {
     protected Map<String, String> headers = new HashMap<>();
     protected Map<String, Object> properties = new HashMap<>();
     protected BlockingQueue<ByteBuffer> messageBody = new LinkedBlockingQueue<>();
+    protected Stack<FaultHandler>  faultHandlerStack = new Stack();
+
+
 
     private boolean eomAdded = false;
 
@@ -52,12 +56,16 @@ public abstract class CarbonMessage {
         return headers;
     }
 
+    public String getHeader(String key) {
+        return headers.get(key);
+    }
+
     public void setHeader(String key, String value) {
         headers.put(key, value);
     }
 
     public void setHeaders(Map<String, String> headerMap) {
-        headerMap.forEach((k, v) -> headers.put(k, v));
+        headerMap.forEach(headers::put);
     }
 
     public Object getProperty(String key) {
@@ -66,6 +74,10 @@ public abstract class CarbonMessage {
         } else {
             return null;
         }
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     public void setProperty(String key, Object value) {
@@ -78,5 +90,13 @@ public abstract class CarbonMessage {
 
     public void removeProperty(String key) {
         properties.remove(key);
+    }
+
+    public Stack<FaultHandler> getFaultHandlerStack() {
+        return faultHandlerStack;
+    }
+
+    public void setFaultHandlerStack(Stack<FaultHandler> faultHandlerStack) {
+        this.faultHandlerStack = faultHandlerStack;
     }
 }
